@@ -1,0 +1,1 @@
+This is a MCP-Server , dedicated for scraping docs for AI Agents and LLMs
