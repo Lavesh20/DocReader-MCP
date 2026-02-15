@@ -2,36 +2,47 @@
 # and return the results
 
 import os
-import requests
+import httpx
 from dotenv import load_dotenv
+import asyncio
+
 
 load_dotenv()
 
-url  = "https://google.serper.dev/search"
+SERPER_API_KEY = os.getenv("SERPER_API_KEY")
 
-def search_serper(query: str) -> dict:
-    api_key = os.getenv("SERPER_API_KEY")
-    if not api_key:
-        raise ValueError("SERPER_API_KEY is not set.")
+if not SERPER_API_KEY:
+    raise ValueError("SERPER_API_KEY is not set.")
 
-    
+SERPER_URL = "https://google.serper.dev/search"
 
-    headers = {
-        "X-API-KEY": api_key,
-        "Content-Type": "application/json",
-    }
 
+async def search_serper(query: str) -> dict:
     payload = {
         "q": query,
         "num": 2
     }
 
-    response = requests.post(url, json=payload, headers=headers)
-    response.raise_for_status()
+    headers = {
+        "X-API-KEY": SERPER_API_KEY,
+        "Content-Type": "application/json",
+    }
 
-    return response.json()
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        response = await client.post(
+            SERPER_URL,
+            json=payload,
+            headers=headers
+        )
+
+        response.raise_for_status()
+        return response.json()
+
 
 
 if __name__ == "__main__":
-    results = search_serper("ChromaDB")
-    print(results)
+    async def main():
+        results = await search_serper("Langchain")
+        print(results)
+
+    asyncio.run(main())
